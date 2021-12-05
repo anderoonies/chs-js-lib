@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Interaction Test</title>
+        <style>
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="game" width="480" height="400"></canvas>
+        <script src="../../../../dist/layer2/chs.iife.js"></script>
+        <script id="code">
+            let label = text('Hello!');
+            add(label);
+            mouseMoveMethod(mouseEvent => {
+                setText(label, `(${getX(mouseEvent)}, ${getY(mouseEvent)})`);
+            });
+        </script>
+        <p>An example showing mouse interaction</p>
+    </body>
+</html>
