@@ -20,31 +20,11 @@ import { default as Sound } from '../../src/sound/sound.js';
 import { default as Group } from '../../src/graphics/group.js';
 import { map } from '../../src/graphics/graphics-utils.js';
 
-window.Arc = Arc;
-window.Audio = Audio;
-window.Circle = Circle;
-window.Color = Color;
-window.Console = Console;
-window.Graphics = GraphicsManager;
-window.Group = Group;
-window.Keyboard = Keyboard;
-window.Line = Line;
-window.Oval = Oval;
-window.Polygon = Polygon;
-window.Queue = Queue;
-window.Rectangle = Rectangle;
-window.Sound = Sound;
-window.Stack = Stack;
-window.Text = Text;
-window.WebVideo = WebVideo;
-window.WebImage = WebImage;
-window.Randomizer = Randomizer;
-
 const GraphicsInstance = new GraphicsManager();
 window.__graphics__ = GraphicsInstance;
 window.add = GraphicsInstance.add.bind(GraphicsInstance);
-window.getWidth = GraphicsInstance.getWidth.bind(GraphicsInstance);
-window.getHeight = GraphicsInstance.getHeight.bind(GraphicsInstance);
+window.screenWidth = GraphicsInstance.getWidth.bind(GraphicsInstance);
+window.screenHeight = GraphicsInstance.getHeight.bind(GraphicsInstance);
 window.mouseClickMethod = GraphicsInstance.mouseClickMethod.bind(GraphicsInstance);
 window.mouseDownMethod = GraphicsInstance.mouseDownMethod.bind(GraphicsInstance);
 window.mouseDragMethod = GraphicsInstance.mouseDragMethod.bind(GraphicsInstance);
@@ -71,3 +51,87 @@ const AudioInstance = new AudioManager();
 window.audioChangeMethod = AudioInstance.audioChangeMethod.bind(AudioInstance);
 
 window.map = map;
+
+const oldRedraw = __graphics__.redraw.bind(__graphics__);
+__graphics__.redraw = () => {
+    removeAll();
+    // user draw
+    draw && typeof draw === 'function' && draw();
+    oldRedraw();
+};
+
+let mouseX = 0;
+let mouseY = 0;
+mouseMoveMethod(e => {
+    mouseX = e.getX();
+    mouseY = e.getY();
+});
+
+const level3 = {
+    mouseX: {
+        value: () => {
+            return mouseX;
+        },
+    },
+    mouseY: {
+        value: () => {
+            return mouseY;
+        },
+    },
+    circle: (radius, x, y) => {
+        radius = radius ?? 25;
+        x = x ?? screenWidth() / 2;
+        y = y ?? screenHeight() / 2;
+        const c = new Circle(radius);
+        c.setPosition(x, y);
+        add(c);
+        return c;
+    },
+    rectangle: (width, height, x, y) => {
+        width = width ?? 50;
+        height = height ?? 50;
+        x = x ?? screenWidth() / 2;
+        y = y ?? screenHeight() / 2;
+        const r = new Rectangle(width, height);
+        r.setPosition(x, y);
+        add(r);
+        return r;
+    },
+    text: (label, x, y) => {
+        x = x ?? screenWidth() / 2;
+        y = y ?? screenHeight() / 2;
+        const t = new Text(label);
+        t.setPosition(x, y);
+        add(t);
+        return t;
+    },
+    position: (thing, x, y) => {
+        return thing.setPosition(x, y);
+    },
+    move: (thing, x, y) => {
+        return thing.move(x, y);
+    },
+    getX: thing => thing.getX(),
+    getY: thing => thing.getY(),
+    getRadius: thing => thing.radius,
+    getWidth: thing => thing.width,
+    getHeight: thing => thing.height,
+    setWidth: (thing, width) => (thing.width = width),
+    setHeight: (thing, height) => (thing.height = height),
+    setText: (thing, text) => (thing.label = text),
+};
+Object.entries(level3).forEach(([name, prop]) => {
+    Object.defineProperty(window, name, {
+        get() {
+            if (typeof prop === 'object') {
+                return prop.value();
+            }
+            return prop;
+        },
+        set() {
+            throw Error(
+                `${name} is a built-in property of the CodeHS JavaScript library. Cant do that!`
+            );
+        },
+    });
+});

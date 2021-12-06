@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Layer 3 Interaction Test</title>
+        <style>
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="game" width="480" height="400"></canvas>
+        <script src="../../../../dist/layer3/chs.iife.js"></script>
+        <script id="code">
+            function draw() {
+                text(`(${mouseX}, ${mouseY})`);
+            }
+        </script>
+        <p>An example showing mouse interaction in layer 3</p>
+    </body>
+</html>

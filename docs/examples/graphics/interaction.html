@@ -14,7 +14,7 @@
         <script id="code">
             let label;
             label = new Text('Hello!');
-            label.setAnchor({ vertical: 0, horizontal: 0 });
+            label.setPosition(getWidth() / 2, getHeight() / 2);
             add(label);
             mouseMoveMethod(e => {
                 label.setText(`(${e.getX()}, ${e.getY()})`);
