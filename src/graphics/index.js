@@ -712,6 +712,8 @@ class GraphicsManager extends Manager {
         if (elapsed > this.fpsInterval) {
             this.lastDrawTime = this.now - (elapsed % this.fpsInterval);
             this.redraw();
+        } else {
+            console.log(`cant update: ${elapsed}`);
         }
     }
 
