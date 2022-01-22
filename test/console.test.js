@@ -35,6 +35,16 @@ describe('Console', () => {
                     },
                 });
                 expect(await c.readLine('Give me a line: ')).toBe('nice');
+                c.configure({
+                    onPrompt: async () => {
+                        return await new Promise(resolve =>
+                            setInterval(() => {
+                                resolve('true');
+                            }, 0)
+                        );
+                    },
+                });
+                expect(await c.readBoolean('T/F? ')).toBe(true);
             });
             it('Allows an async prompt to be treated as a Promise', () => {
                 const c = new Console();

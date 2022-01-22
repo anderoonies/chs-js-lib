@@ -129,6 +129,9 @@ export default class Console {
             if (result === null) {
                 return null;
             }
+            if (Promise.resolve(result) === result) {
+                return result.then(parseFn);
+            }
             result = parseFn(result);
 
             if (!isNaN(result)) {
