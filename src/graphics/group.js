@@ -44,6 +44,7 @@ class Group extends Thing {
          * @type {HTMLCanvasElement}
          */
         this._hiddenCanvas = document.createElement('canvas');
+        document.body.appendChild(this._hiddenCanvas);
         this._hiddenCanvas.width = 1;
         this._hiddenCanvas.height = 1;
         this._hiddenContext = this._hiddenCanvas.getContext('2d');
@@ -186,14 +187,16 @@ class Group extends Thing {
             // in the top left corner.
             // this means that only the bounding box surrounding the top
             // left corner needs to be drawn to the destination canvas
-            this._hiddenContext.translate(-bounds.left, -bounds.top);
+            const drawX = bounds.left + width * this.anchor.horizontal;
+            const drawY = bounds.top + height * this.anchor.vertical;
+            this._hiddenContext.translate(-drawX, -drawY);
             this.elements
                 .filter(element => element.alive)
                 .sort((a, b) => a.layer - b.layer)
                 .forEach(element => {
                     element.draw(this._hiddenContext);
                 });
-            this._hiddenContext.translate(bounds.left, bounds.top);
+            this._hiddenContext.translate(drawX, drawY);
             context.drawImage(this._hiddenCanvas, 0, 0, width, height);
             context.closePath();
         });
@@ -230,8 +233,8 @@ class Group extends Thing {
      * @private
      */
     _updateBounds() {
-        let maxX = 0;
-        let maxY = 0;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
         let minX = Infinity;
         let minY = Infinity;
         this.elements.forEach(element => {
@@ -272,14 +275,14 @@ class Group extends Thing {
             maxX = Math.max(maxX, right);
             maxY = Math.max(maxY, bottom);
         });
-        this.bounds = {
-            left: minX,
-            right: maxX,
-            top: minY,
-            bottom: maxY,
-        };
         const width = maxX - minX;
         const height = maxY - minY;
+        this.bounds = {
+            left: minX - this.anchor.horizontal * width,
+            right: maxX - this.anchor.horizontal * width,
+            top: minY - this.anchor.vertical * height,
+            bottom: maxY - this.anchor.vertical * height,
+        };
         this._hiddenCanvas.width = this.devicePixelRatio * width;
         this._hiddenCanvas.height = this.devicePixelRatio * height;
         this._hiddenCanvas.style.width = `${width}px`;

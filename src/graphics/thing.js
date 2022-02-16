@@ -447,10 +447,11 @@ class Thing {
         }
         context.globalAlpha = this.opacity;
 
-        const anchorX = this.width * this.anchor.horizontal;
-        const anchorY = this.height * this.anchor.vertical;
-        const drawX = this.x - anchorX;
-        const drawY = this.y - anchorY;
+        const bounds = this.getBounds();
+        const width = bounds.right - bounds.left;
+        const height = bounds.bottom - bounds.top;
+        const drawX = bounds.left;
+        const drawY = bounds.top;
 
         // translate to the location of the shape
         context.translate(drawX, drawY);
@@ -458,9 +459,9 @@ class Thing {
         if (this.rotation) {
             // translate to the shape's center to perform rotation around its center,
             // then translate back
-            context.translate(this.width / 2, this.height / 2);
+            context.translate(width / 2, height / 2);
             context.rotate(this.rotation);
-            context.translate(-this.width / 2, -this.height / 2);
+            context.translate(-width / 2, -height / 2);
         }
 
         subclassDraw?.();
@@ -476,12 +477,17 @@ class Thing {
         if (this.debug) {
             // draw the origin when debugging
             context.beginPath();
-            context.arc(anchorX, anchorY, 3, 0, 2 * Math.PI);
+            context.arc(
+                width * this.getAnchor().horizontal,
+                height * this.getAnchor().vertical,
+                3,
+                0,
+                2 * Math.PI
+            );
             context.closePath();
             context.fillStyle = 'red';
             context.strokeStyle = 'red';
             context.fill();
-            const bounds = this.getBounds();
             context.strokeRect(0, 0, bounds.right - bounds.left, bounds.bottom - bounds.top);
         }
 
@@ -571,29 +577,10 @@ class Thing {
      * @private
      */
     _updateBounds() {
-        let left = Math.ceil(this.x - this.anchor.horizontal * this.width);
-        let right = Math.ceil(this.x + (1 - this.anchor.horizontal) * this.width);
-        let top = Math.ceil(this.y - this.anchor.vertical * this.height);
-        let bottom = Math.ceil(this.y + (1 - this.anchor.vertical) * this.height);
-        //if (this.rotation) {
-        //    const rotX = (right - left) / 2 + left;
-        //    const rotY = (bottom - top) / 2 + top;
-        //    let topLeft = rotatePointAboutPosition([left, top], [rotX, rotY], this.rotation);
-        //    let topRight = rotatePointAboutPosition([right, top], [rotX, rotY], this.rotation);
-        //    let bottomLeft = rotatePointAboutPosition([left, bottom], [rotX, rotY], this.rotation);
-        //    let bottomRight = rotatePointAboutPosition(
-        //        [right, bottom],
-        //        [rotX, rotY],
-        //        this.rotation
-        //    );
-        //    const points = [topLeft, topRight, bottomLeft, bottomRight];
-        //    const xCoordinates = points.map(point => point[0]);
-        //    const yCoordinates = points.map(point => point[1]);
-        //    left = Math.min(...xCoordinates);
-        //    right = Math.max(...xCoordinates);
-        //    top = Math.min(...yCoordinates);
-        //    bottom = Math.max(...yCoordinates);
-        //}
+        let left = this.x - this.anchor.horizontal * this.width;
+        let right = this.x + (1 - this.anchor.horizontal) * this.width;
+        let top = this.y - this.anchor.vertical * this.height;
+        let bottom = this.y + (1 - this.anchor.vertical) * this.height;
         this.bounds = {
             left,
             right,

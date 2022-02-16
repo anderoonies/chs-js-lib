@@ -49,10 +49,10 @@ class Polygon extends Thing {
 
         super.draw(context, () => {
             context.save();
-            context.translate(-this.x, -this.y);
             context.beginPath();
             const first = this.points[0];
             let current;
+            context.translate(-first.x, -first.y);
             context.moveTo(first.x, first.y);
             for (let i = 1; i < this.points.length; i++) {
                 current = this.points[i];
@@ -214,6 +214,37 @@ class Polygon extends Thing {
         const dx = x - this.x;
         const dy = y - this.y;
         this.move(dx, dy);
+    }
+
+    /**
+     * Calculate the bounds of the Polygon.
+     * Polygon is the only subclass of Thing that needs to have its bounds manually calculated,
+     * since it has the unusual property of having its geometry exist entirely separate from its
+     * position.
+     */
+    _updateBounds() {
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+
+        this.points.forEach(({ x, y }) => {
+            minX = Math.min(x, minX);
+            minY = Math.min(y, minY);
+            maxX = Math.max(x, maxX);
+            maxY = Math.max(y, maxY);
+        });
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+        this.bounds = {
+            left: minX - this.anchor.horizontal * width,
+            right: maxX - this.anchor.horizontal * width,
+            top: minY - this.anchor.vertical * height,
+            bottom: maxY - this.anchor.vertical * height,
+        };
+        this._lastCalculatedBoundsID++;
+        this._boundsInvalidated = false;
     }
 }
 

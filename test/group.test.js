@@ -188,6 +188,27 @@ describe('Groups', () => {
             expect(g.containsPoint(-5, -5)).toBeTrue();
         });
     });
+    describe('Anchoring', () => {
+        it('Positions according to anchor', () => {
+            const gfx = new Graphics({ shouldUpdate: false });
+            let g = new Group();
+            let r = new Rectangle(20, 20);
+            r.setColor('red');
+            r.setPosition(1, 1);
+            g.add(r);
+            gfx.add(g);
+
+            expect(gfx.getPixel(0, 0)).toEqual([0, 0, 0, 0]);
+            expect(gfx.getPixel(1, 1)).toEqual([255, 0, 0, 255]);
+
+            g.setAnchor({ vertical: 0.5, horizontal: 0 });
+            expect(gfx.getPixel(0, 0)).toEqual([0, 0, 0, 0]);
+            expect(gfx.getPixel(1, 0)).toEqual([255, 0, 0, 255]);
+
+            g.setAnchor({ vertical: 0.5, horizontal: 0.5 });
+            expect(gfx.getPixel(1, 1)).toEqual([0, 0, 0, 0]);
+        });
+    });
     describe('Drawing', () => {
         it('Draws according to layer', () => {
             const g = new Group();

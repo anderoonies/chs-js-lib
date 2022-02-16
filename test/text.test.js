@@ -24,13 +24,19 @@ describe('Text', () => {
             const canvasTranslateSpy = spyOn(g.getContext(), 'translate').and.callThrough();
             g.add(t);
             g.redraw();
-            expect(canvasTranslateSpy).toHaveBeenCalledWith(0, t.getAnchor().vertical * t.height);
+            expect(canvasTranslateSpy).toHaveBeenCalledWith(0, t.height);
             t.setAnchor({ horizontal: 0.5, vertical: 0.5 });
             g.redraw();
-            expect(canvasTranslateSpy).toHaveBeenCalledWith(t.x - t.width / 2, t.y - t.height / 2);
+            expect(canvasTranslateSpy).toHaveBeenCalledWith(
+                Math.ceil(-t.width / 2),
+                Math.ceil(-t.height / 2)
+            );
             t.setPosition(10, 10);
             g.redraw();
-            expect(canvasTranslateSpy).toHaveBeenCalledWith(t.x - t.width / 2, t.y - t.height / 2);
+            expect(canvasTranslateSpy).toHaveBeenCalledWith(
+                10 + Math.ceil(-t.width / 2),
+                10 + Math.ceil(-t.height / 2)
+            );
         });
     });
     describe('setFont', () => {
