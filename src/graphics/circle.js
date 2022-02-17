@@ -44,11 +44,9 @@ class Circle extends Thing {
      */
     draw(context) {
         super.draw(context, () => {
-            context.translate(this.radius, this.radius);
             context.beginPath();
-            context.arc(0, 0, this.radius, 0, Math.PI * 2, true);
+            context.arc(this.radius, this.radius, this.radius, 0, Math.PI * 2, true);
             context.closePath();
-            context.translate(-this.radius, -this.radius);
         });
     }
 

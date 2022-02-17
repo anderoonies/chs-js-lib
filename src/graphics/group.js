@@ -52,35 +52,35 @@ class Group extends Thing {
         this.bounds = null;
     }
 
-    /**
-     * X position of the group, indicated by its left bound.
-     * @type {number}
-     */
-    get x() {
-        return this.getBounds().left;
-    }
+    // /**
+    //  * X position of the group, indicated by its left bound.
+    //  * @type {number}
+    //  */
+    // get x() {
+    //     return this.getBounds().left;
+    // }
 
-    set x(x) {
-        if (!this.bounds) {
-            return;
-        }
-        this.setPosition(x, this.bounds.top);
-    }
+    // set x(x) {
+    //     if (!this.bounds) {
+    //         return;
+    //     }
+    //     this.setPosition(x, this.bounds.top);
+    // }
 
-    /**
-     * X position of the group, indicated by its top bound.
-     * @type {number}
-     */
-    get y() {
-        return this.getBounds().top;
-    }
+    // /**
+    //  * X position of the group, indicated by its top bound.
+    //  * @type {number}
+    //  */
+    // get y() {
+    //     return this.getBounds().top;
+    // }
 
-    set y(y) {
-        if (!this.bounds) {
-            return;
-        }
-        this.setPosition(this.bounds.left, y);
-    }
+    // set y(y) {
+    //     if (!this.bounds) {
+    //         return;
+    //     }
+    //     this.setPosition(this.bounds.left, y);
+    // }
 
     /**
      * Width of the group, meaning the difference between right and left bounds.
@@ -152,6 +152,7 @@ class Group extends Thing {
     }
 
     /**
+     * TODO: UPDATE COMMENT
      * Set the position of the group.
      * This will calculate the difference between the current and desired position
      * and .move() the group and all its elements by that distance.
@@ -160,10 +161,11 @@ class Group extends Thing {
      * @param {number} y
      */
     setPosition(x, y) {
-        const bounds = this.getBounds();
-        const dx = x - bounds.left;
-        const dy = y - bounds.top;
-        this.move(dx, dy);
+        this.x = x;
+        this.y = y;
+        // const dx = x - this.x - this.anchor.horizontal * this.width;
+        // const dy = y - this.y - this.anchor.vertical * this.height;
+        // this.move(dx, dy);
     }
 
     /**
@@ -183,20 +185,20 @@ class Group extends Thing {
                 return;
             }
             this._hiddenContext.clearRect(0, 0, width, height);
-            // translate the hidden context so that the group is drawn
-            // in the top left corner.
-            // this means that only the bounding box surrounding the top
-            // left corner needs to be drawn to the destination canvas
-            const drawX = bounds.left + width * this.anchor.horizontal;
-            const drawY = bounds.top + height * this.anchor.vertical;
-            this._hiddenContext.translate(-drawX, -drawY);
+            // // translate the hidden context so that the group is drawn
+            // // in the top left corner.
+            // // this means that only the bounding box surrounding the top
+            // // left corner needs to be drawn to the destination canvas
+            // const drawX = bounds.left + width * this.anchor.horizontal;
+            // const drawY = bounds.top + height * this.anchor.vertical;
+            // this._hiddenContext.translate(-drawX, -drawY);
             this.elements
                 .filter(element => element.alive)
                 .sort((a, b) => a.layer - b.layer)
                 .forEach(element => {
                     element.draw(this._hiddenContext);
                 });
-            this._hiddenContext.translate(drawX, drawY);
+            // this._hiddenContext.translate(drawX, drawY);
             context.drawImage(this._hiddenCanvas, 0, 0, width, height);
             context.closePath();
         });
@@ -220,8 +222,17 @@ class Group extends Thing {
      * @returns {boolean}
      */
     _containsPoint(x, y) {
-        x += this.width * this.anchor.horizontal;
-        y += this.height * this.anchor.vertical;
+        x -= this.x - this.width * this.anchor.horizontal;
+        y -= this.y - this.height * this.anchor.vertical;
+        if (this.rotation) {
+            const anchorX = this.width * this.anchor.horizontal;
+            const anchorY = this.height * this.anchor.vertical;
+            // const rotX = this.x - this.anchor.horizontal * this.width + this.width / 2
+            // const rotY = this.y - this.anchor.horizontal * this.height + this.height / 2;
+            const rotX = this.x + this.width / 2;
+            const rotY = this.y + this.height / 2;
+            [x, y] = rotatePointAboutPosition([x, y], [rotX, rotY], -this.rotation);
+        }
         return this.elements.some(e => e.containsPoint(x, y));
     }
 
@@ -278,15 +289,18 @@ class Group extends Thing {
         const width = maxX - minX;
         const height = maxY - minY;
         this.bounds = {
-            left: minX - this.anchor.horizontal * width,
-            right: maxX - this.anchor.horizontal * width,
-            top: minY - this.anchor.vertical * height,
-            bottom: maxY - this.anchor.vertical * height,
+            left: this.x + minX - this.anchor.horizontal * width,
+            right: this.x + maxX - this.anchor.horizontal * width,
+            top: this.y + minY - this.anchor.vertical * height,
+            bottom: this.y + maxY - this.anchor.vertical * height,
         };
-        this._hiddenCanvas.width = this.devicePixelRatio * width;
-        this._hiddenCanvas.height = this.devicePixelRatio * height;
-        this._hiddenCanvas.style.width = `${width}px`;
-        this._hiddenCanvas.style.height = `${height}px`;
+        // always round up, so that pixels dont get chopped off in the hidden canvas
+        let canvasWidth = Math.ceil(width);
+        let canvasHeight = Math.ceil(height);
+        this._hiddenCanvas.width = this.devicePixelRatio * canvasWidth;
+        this._hiddenCanvas.height = this.devicePixelRatio * canvasHeight;
+        this._hiddenCanvas.style.width = `${canvasWidth}px`;
+        this._hiddenCanvas.style.height = `${canvasHeight}px`;
         this._hiddenContext.scale(this.devicePixelRatio, this.devicePixelRatio);
         this._lastCalculatedBoundsID++;
         this._boundsInvalidated = false;

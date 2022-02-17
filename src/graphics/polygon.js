@@ -52,7 +52,7 @@ class Polygon extends Thing {
             context.beginPath();
             const first = this.points[0];
             let current;
-            context.translate(-first.x, -first.y);
+            // context.translate(-first.x, -first.y);
             context.moveTo(first.x, first.y);
             for (let i = 1; i < this.points.length; i++) {
                 current = this.points[i];
@@ -79,8 +79,8 @@ class Polygon extends Thing {
      * @returns {boolean}
      */
     _containsPoint(x, y) {
-        x += this.width * this.anchor.horizontal;
-        y += this.height * this.anchor.vertical;
+        x -= this.x - this.width * this.anchor.horizontal;
+        y -= this.y - this.height * this.anchor.vertical;
         // https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
         // solution 3 from above
         let previousOrientation = -1;
@@ -211,9 +211,11 @@ class Polygon extends Thing {
      * @param {number} y
      */
     setPosition(x, y) {
-        const dx = x - this.x;
-        const dy = y - this.y;
-        this.move(dx, dy);
+        // const dx = x - this.x;
+        // const dy = y - this.y;
+        this.x = x;
+        this.y = y;
+        // this.move(dx, dy);
     }
 
     /**
@@ -238,10 +240,10 @@ class Polygon extends Thing {
         const width = maxX - minX;
         const height = maxY - minY;
         this.bounds = {
-            left: minX - this.anchor.horizontal * width,
-            right: maxX - this.anchor.horizontal * width,
-            top: minY - this.anchor.vertical * height,
-            bottom: maxY - this.anchor.vertical * height,
+            left: this.x + minX - this.anchor.horizontal * width,
+            right: this.x + maxX - this.anchor.horizontal * width,
+            top: this.y + minY - this.anchor.vertical * height,
+            bottom: this.y + maxY - this.anchor.vertical * height,
         };
         this._lastCalculatedBoundsID++;
         this._boundsInvalidated = false;
