@@ -4,8 +4,8 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [released]
+  pull_request:
+    branches: [testing123]
 
 jobs:
   publish-npm:
