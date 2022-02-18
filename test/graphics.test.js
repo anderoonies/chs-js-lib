@@ -276,6 +276,44 @@ describe('Graphics', () => {
             expect(g.elementPool[1].alive).toBeTrue();
             expect(g.elementPool[2].alive).toBeFalse();
         });
+        it('Properly handles duplicated elements', () => {
+            const g = new Graphics({ shouldUpdate: false });
+            const a = new Circle(1);
+            const b = new Circle(1);
+            const c = new Circle(1);
+            g.add(a);
+            g.add(b);
+            g.add(c);
+            g.add(a);
+            expect(g.elementPool).toEqual([a, b, c, a]);
+            expect(g.elementPoolSize).toEqual(4);
+            g.remove(a);
+            expect(g.elementPool).toEqual([a, b, c, a]);
+            expect(g.elementPoolSize).toEqual(4);
+            g.redraw();
+            expect(g.elementPool).toEqual([b, c, a, a]);
+            expect(g.elementPoolSize).toEqual(2);
+            g.add(a);
+            g.redraw();
+            expect(g.elementPool).toEqual([b, c, a, a]);
+            expect(g.elementPoolSize).toEqual(3);
+            a.layer = -1;
+            g.redraw();
+            expect(g.elementPool).toEqual([a, a, b, c]);
+            expect(g.elementPoolSize).toEqual(4);
+        });
+    });
+    describe('fullReset', () => {
+        it('Clears all elements', () => {
+            const g = new Graphics({ shouldUpdate: false });
+            g.add(new Circle(20));
+            expect(g.elementPoolSize).toEqual(1);
+            g.fullReset();
+            expect(g.elementPoolSize).toEqual(0);
+            expect(() => {
+                g.redraw();
+            }).not.toThrow();
+        });
     });
     describe('setBackgroundColor', () => {
         it('Causes drawBackground to be invoked in redraw()', () => {
@@ -393,6 +431,24 @@ describe('Graphics', () => {
                             expect(timerTwo).not.toHaveBeenCalled();
                             resolve();
                         });
+                    });
+                });
+                describe('Timer collision', () => {
+                    it('Multiple timers with the same name will all be stopped', () => {
+                        const timerOneSpy = jasmine.createSpy();
+                        const timerTwoSpy = jasmine.createSpy();
+                        const g = new Graphics();
+                        g.setTimer(timerOneSpy, 15, {}, 'sharedname');
+                        g.setTimer(timerTwoSpy, 15, {}, 'sharedname');
+                        g.stopAllTimers();
+                        return new Promise(resolve => {
+                            setTimeout(() => {
+                                expect(timerOneSpy).not.toHaveBeenCalled();
+                                expect(timerTwoSpy).not.toHaveBeenCalled();
+                                resolve();
+                            }, 100);
+                        });
+                        expect();
                     });
                 });
             });
