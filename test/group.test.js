@@ -239,5 +239,12 @@ describe('Groups', () => {
             expect(hiddenCanvas.style.width).toEqual('40px');
             expect(hiddenCanvas.style.height).toEqual('20px');
         });
+        it('Rounds up to make sure all pixels are included', () => {
+            const g = new Group();
+            g.add(new Rectangle(20.5, 20.5));
+            g.getBounds();
+            expect(g._hiddenCanvas.width).toEqual(window.devicePixelRatio * 21);
+            expect(g._hiddenCanvas.height).toEqual(window.devicePixelRatio * 21);
+        });
     });
 });
